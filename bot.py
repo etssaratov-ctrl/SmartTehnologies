@@ -13,6 +13,7 @@ Telegram-бот "Интернет-магазин" на python-telegram-bot v20+
 
 import logging
 import os
+import warnings
 from dataclasses import dataclass
 
 from telegram import (
@@ -30,12 +31,28 @@ from telegram.ext import (
     MessageHandler,
     filters,
 )
+# Наш ConversationHandler для оформления заказа осознанно смешивает
+# CallbackQueryHandler (вход по кнопке) и MessageHandler (ввод текста),
+# поэтому per_message=False — корректная настройка, а не ошибка.
+# Библиотека всё равно предупреждает об этом в такой комбинации —
+# подавляем именно это (и только это) предупреждение, чтобы не шуметь в логах.
+try:
+    from telegram.warnings import PTBUserWarning
+    _warning_category = PTBUserWarning
+except ImportError:  # на случай другой версии python-telegram-bot
+    _warning_category = UserWarning
+
+warnings.filterwarnings(
+    "ignore",
+    message=r"If 'per_message=False'.*CallbackQueryHandler.*",
+    category=_warning_category,
+)
 
 # ---------------------------------------------------------------------------
 # Настройки
 # ---------------------------------------------------------------------------
 
-BOT_TOKEN = os.getenv("BOT_TOKEN", "8921387718:AAG4pThUlb9sDdpo1S106n-T2EnOZPfC46Y")
+BOT_TOKEN = os.getenv("BOT_TOKEN", "ВСТАВЬТЕ_СЮДА_ВАШ_ТОКЕН")
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -378,4 +395,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
